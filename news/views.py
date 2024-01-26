@@ -1,7 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from news.models import News, Comment
-from news.serializers import NewsListSerializer, NewsDetailSerializer, CommentListSerializer
+from news.serializers import NewsListSerializer, NewsDetailSerializer, \
+    CommentListSerializer, NewsValidateSerializer
 
 
 @api_view(['GET'])
@@ -26,26 +27,11 @@ def news_list(request):
         return Response(serializer.data, status=200)
 
     elif request.method == 'POST':
-        title = request.data.get('title')
-        content = request.data.get('content')
-        category_id = request.data.get('category_id')
-        tags = request.data.get('tags', [])
-        news = News.objects.create(
-            title=title,
-            content=content,
-            category_id=category_id
-        )
-
-        # 1 способ
-        news.tags.set(tags)
-
-        # 2 способ
-        # for tag_id in tags:
-        #     news.tags.add(tag_id)
-
-        # 3 способ
-        # news.tags.add(*tags)
-
+        serializer = NewsValidateSerializer(data=request.data)
+        # if not serializer.is_valid():
+        #     return Response(serializer.errors, status=400)
+        serializer.is_valid(raise_exception=True)
+        news = serializer.save()
         data = NewsListSerializer(instance=news, many=False).data
         return Response(data, status=201)
 
@@ -61,12 +47,11 @@ def news_detail(request, news_id):
         return Response(serializer.data, status=200)
 
     elif request.method == 'PUT':
-        news.title = request.data.get('title', news.title)
-        news.content = request.data.get('content', news.content)
-        news.category_id = request.data.get('category_id', news.category_id)
-        news.tags.set(request.data.get('tags', news.tags.all()))
-        news.save()
-        data = NewsListSerializer(instance=news, many=False).data
+        serializer = NewsValidateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        updated_news = serializer.update(news, serializer.validated_data)
+
+        data = NewsListSerializer(instance=updated_news, many=False).data
         return Response(data, status=200)
 
     elif request.method == 'DELETE':
