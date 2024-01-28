@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
 from news.models import News, Comment
 from news.serializers import NewsListSerializer, NewsDetailSerializer, \
@@ -14,8 +15,10 @@ def hello_world(request):
 
 
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def news_list(request):
     if request.method == 'GET':
+        print(request.user)
         search = request.GET.get('search', '')
 
         # Get all news
