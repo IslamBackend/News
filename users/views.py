@@ -1,4 +1,5 @@
 from rest_framework.authtoken.models import Token
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -26,25 +27,48 @@ def register(request):
     )
 
 
-@api_view(['POST'])
-def login(request):
-    # 0 - валидация
-    serializer = LoginSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
+# @api_view(['POST'])
+# def login(request):
+#     # 0 - валидация
+#     serializer = LoginSerializer(data=request.data)
+#     serializer.is_valid(raise_exception=True)
+#
+#     # serializer.data -> {'username': 'admin', 'password': 'admin'}
+#
+#     # 2 - найти пользователя в базе данных
+#     user = authenticate(**serializer.data)  # None or User
+#
+#     if user:
+#         # 3 - создать токен
+#         token, created = Token.objects.get_or_create(user=user)  # (token, True/False)
+#
+#         # 4 - вернуть токен
+#         return Response({'token': token.key})
+#
+#     return Response({'ERROR': 'WRONG CREDENTIALS'}, status=400)
 
-    # serializer.data -> {'username': 'admin', 'password': 'admin'}
 
-    # 2 - найти пользователя в базе данных
-    user = authenticate(**serializer.data)  # None or User
+class Login(GenericAPIView):
+    serializer_class = LoginSerializer
 
-    if user:
-        # 3 - создать токен
-        token, created = Token.objects.get_or_create(user=user)  # (token, True/False)
+    def post(self, request):
+        # 0 - валидация
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        # 4 - вернуть токен
-        return Response({'token': token.key})
+        # serializer.data -> {'username': 'admin', 'password': 'admin'}
 
-    return Response({'ERROR': 'WRONG CREDENTIALS'}, status=400)
+        # 2 - найти пользователя в базе данных
+        user = authenticate(**serializer.data)  # None or User
+
+        if user:
+            # 3 - создать токен
+            token, created = Token.objects.get_or_create(user=user)  # (token, True/False)
+
+            # 4 - вернуть токен
+            return Response({'token': token.key})
+
+        return Response({'ERROR': 'WRONG CREDENTIALS'}, status=400)
 
 
 @api_view(['GET'])
