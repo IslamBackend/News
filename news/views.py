@@ -27,6 +27,10 @@ class CategoryListCreateAPIView(ListCreateAPIView):
     # permission_classes = [IsAuthenticated]
     # pagination_class = None
 
+    # def list(self, request, *args, **kwargs):
+    #     serializer = TagSerializer(instance=self.get_queryset(), many=True)
+    #     return Response(serializer.data)
+
 
 class CategoryDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
@@ -68,9 +72,9 @@ def news_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
-def news_detail(request, news_id):
+def news_detail(request, slug):
     try:
-        news = News.objects.get(id=news_id)
+        news = News.objects.get(slug=slug)
     except News.DoesNotExist as e:
         return Response({'error': str(e)}, status=404)
     if request.method == 'GET':
