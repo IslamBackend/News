@@ -18,12 +18,20 @@ class Category(BaseModel):
     def __str__(self) -> str:
         return f'Category: {self.name}'
 
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
 
 class Tag(BaseModel):
     name = models.CharField(max_length=255)
 
     def __str__(self) -> str:
         return f'Tag: {self.name}'
+
+    class Meta:
+        verbose_name = 'Тэг'
+        verbose_name_plural = 'Тэги'
 
 
 class News(BaseModel):
@@ -37,6 +45,10 @@ class News(BaseModel):
 
     def __str__(self):
         return f'News: {self.title}'
+
+    class Meta:
+        verbose_name = 'Новость'
+        verbose_name_plural = 'Новости'
 
     def category_str(self):
         if self.category:
